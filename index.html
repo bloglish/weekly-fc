@@ -489,6 +489,20 @@ body {
   display: flex; align-items: center; gap: 8px;
 }
 .pd-stat-note { font-size: 10px; color: var(--text-dim); text-align: right; margin-top: 6px; }
+.pd-nav-btn {
+  width: 44px; height: 44px;
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 22px; font-weight: 400; line-height: 1;
+  color: var(--text); cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.12s;
+}
+.pd-nav-btn:disabled { color: var(--text-dim); border-color: var(--border); cursor: default; }
+.pd-nav-btn:not(:disabled):active { background: var(--accent-pale); }
+#pd-footer { align-items: center; }
+#pd-footer .btn-cancel,
+#pd-footer .btn-save { flex: 1; }
 
 /* ══════════════════════════════════════════════
    ROTATION
@@ -2724,12 +2738,26 @@ function renderSquad(){
   }).join('');
 }
 
+function detailNavList(){
+  const list = S.filter==='ALL' ? [...S.players] : S.players.filter(p=>p.pos===S.filter);
+  if(S.sort==='ovr') list.sort((a,b)=>ovr(b)-ovr(a));
+  else if(S.sort==='name') list.sort((a,b)=>a.name.localeCompare(b.name,'ko'));
+  else list.sort((a,b)=>a.num-b.num);
+  return list;
+}
+
 function openPlayerDetail(num){
   const p=S.players.find(pl=>String(pl.num)===String(num));
   if(!p) return;
   const o=ovr(p), fo=fifaOvr(o), fc=fifaClass(o);
   const tc=fc==='fifa-gold'?'pr-gold':fc==='fifa-silver'?'pr-silver':'pr-bronze';
   const icon=resolveIcon(p);
+
+  const navList = detailNavList();
+  const idx = navList.findIndex(pl=>String(pl.num)===String(num));
+  const prevNum = idx > 0 ? navList[idx-1].num : null;
+  const nextNum = idx < navList.length-1 ? navList[idx+1].num : null;
+
   document.getElementById('pd-body').innerHTML=`
     <div class="pd-header">
       <span class="pd-icon">${icon}</span>
@@ -2756,9 +2784,16 @@ function openPlayerDetail(num){
     <div class="pd-stat-note">※ 수치는 FIFA 40–99 스케일 환산 · 85+ 탁월 · 70–84 양호 · 55–69 보통 · ~54 부족</div>
     ${p.note?`<div class="pd-info-item">📝 <span>${p.note}</span></div>`:''}
   `;
-  document.getElementById('pd-footer').innerHTML=S.adminMode
-    ?`<button class="btn-save" onclick="closeModal('playerDetailOverlay');openPlayerModal(${p.num})">✏ 편집</button>`
-    :'';
+
+  const editBtn = S.adminMode
+    ? `<button class="btn-cancel pd-edit-btn" onclick="closeModal('playerDetailOverlay');openPlayerModal(${p.num})">✏ 편집</button>`
+    : `<button class="btn-cancel" onclick="closeModal('playerDetailOverlay')">닫기</button>`;
+
+  document.getElementById('pd-footer').innerHTML=`
+    <button class="pd-nav-btn" onclick="openPlayerDetail(${prevNum})" ${prevNum===null?'disabled':''}>‹</button>
+    ${editBtn}
+    <button class="pd-nav-btn" onclick="openPlayerDetail(${nextNum})" ${nextNum===null?'disabled':''}>›</button>
+  `;
   openModal('playerDetailOverlay');
 }
 
