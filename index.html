@@ -811,21 +811,25 @@ body {
 .fg-hint { font-size: 11px; color: var(--text-dim); }
 
 /* Star rating */
-.star-input { display: flex; gap: 2px; direction: rtl; }
-.star-input input[type=radio] { display: none; }
-.star-input label {
-  font-size: 26px;
-  color: #d1d5db;
-  cursor: pointer;
-  transition: color 0.1s;
+.attrs-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.attr-field { display: flex; flex-direction: column; gap: 6px; }
+.attr-field .fg-label { display: block; }
+.attr-stepper {
+  display: flex; align-items: center; gap: 0;
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm); overflow: hidden; height: 40px;
 }
-.star-input input:checked ~ label { color: #f59e0b !important; }
-.star-input label:hover,
-.star-input label:hover ~ label { color: #f59e0b !important; }
-.star-input input:checked + label { color: #d1d5db !important; }
-
-.attrs-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
-.attr-field .fg-label { display: block; margin-bottom: 4px; }
+.attr-stepper button {
+  width: 36px; height: 100%; flex-shrink: 0;
+  background: none; border: none; cursor: pointer;
+  font-size: 18px; font-weight: 300; color: var(--text-muted);
+  transition: background 0.1s;
+}
+.attr-stepper button:active { background: var(--accent-pale); }
+.attr-stepper-val {
+  flex: 1; text-align: center;
+  font-size: 16px; font-weight: 800; color: var(--text);
+}
 
 /* Attendance */
 .attend-grid {
@@ -3013,13 +3017,26 @@ function buildAttrs(){
   document.getElementById('attrsGrid').innerHTML=ATTRS.map(a=>`
     <div class="attr-field">
       <label class="fg-label">${a.label}</label>
-      <div class="star-input" id="si-${a.key}">
-        ${[5,4,3,2,1].map(v=>`<input type="radio" name="si-${a.key}" id="s-${a.key}-${v}" value="${v}"><label for="s-${a.key}-${v}">★</label>`).join('')}
+      <div class="attr-stepper">
+        <button type="button" onclick="stepAttr('${a.key}',-1)">−</button>
+        <span class="attr-stepper-val" id="sv-${a.key}">3</span>
+        <button type="button" onclick="stepAttr('${a.key}',1)">+</button>
       </div>
     </div>`).join('');
 }
-function setStarVal(key,val){ const el=document.querySelector(`#si-${key} input[value="${Math.round(Number(val)||3)}"]`); if(el) el.checked=true; }
-function getStarVal(key){ const el=document.querySelector(`#si-${key} input:checked`); return el?Number(el.value):3; }
+function setStarVal(key,val){
+  const el=document.getElementById(`sv-${key}`);
+  if(el) el.textContent=Math.min(5,Math.max(1,Math.round(Number(val)||3)));
+}
+function getStarVal(key){
+  const el=document.getElementById(`sv-${key}`);
+  return el?Number(el.textContent):3;
+}
+function stepAttr(key,delta){
+  const el=document.getElementById(`sv-${key}`);
+  if(!el) return;
+  el.textContent=Math.min(5,Math.max(1,Number(el.textContent)+delta));
+}
 
 function onPosChange(){
   const pos=document.getElementById('f-pos').value;
