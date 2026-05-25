@@ -206,6 +206,7 @@ body {
 .duty-col { flex: 1; }
 .duty-col--next { opacity: 0.72; }
 .duty-divider { width: 1px; background: rgba(255,255,255,0.25); margin: 0 16px; align-self: stretch; }
+.duty-more { margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.18); font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.85); text-align: right; }
 .duty-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 2px; }
 .duty-chip {
   background: rgba(255,255,255,0.22);
@@ -1729,16 +1730,14 @@ body.admin .comment-del-btn { display: block; }
 
     <!-- ── HOME ──────────────────────────────── -->
     <div id="sec-home" class="section active">
+      <!-- 이번 달 당번 (히어로) -->
       <div id="dutyCard"></div>
-
-      <!-- 팀 통계 -->
-      <div id="homeStats"></div>
-
-      <!-- 베스트 선수 -->
-      <div id="homeTopPlayers"></div>
 
       <!-- 최근 매치 -->
       <div id="homeRecentMatch"></div>
+
+      <!-- 베스트 선수 -->
+      <div id="homeTopPlayers"></div>
 
       <!-- 대표 스쿼드 -->
       <div class="home-squad-card" onclick="goToFormation()">
@@ -1749,6 +1748,9 @@ body.admin .comment-del-btn { display: block; }
         </div>
         <div class="home-pitch" id="homePitchEl"></div>
       </div>
+
+      <!-- 팀 요약 (보조 정보) -->
+      <div id="homeStats"></div>
 
       <!-- 최신 영상 -->
       <div id="homeVideoSection" style="display:none">
@@ -1926,7 +1928,7 @@ body.admin .comment-del-btn { display: block; }
             <div class="rule-card-title">모임 통장</div>
           </div>
           <div class="rule-card-body">
-            <div class="rule-li">회비·계좌번호 안내는 <strong>카카오톡 단톡방</strong> 참고</div>
+            <div class="rule-li">카카오뱅크 안심계좌 <strong>7942-11-99103</strong> (위클리FC)</div>
             <div class="rule-li">모임 시작일: 2025.01.18</div>
             <div class="rule-li">통장 초대 문의: <strong>김준영</strong></div>
           </div>
@@ -1949,10 +1951,6 @@ body.admin .comment-del-btn { display: block; }
     <button class="nav-btn" onclick="switchTab('match',this)">
       <span class="nav-icon">⚽</span>
       <span class="nav-label">매치</span>
-    </button>
-    <button class="nav-btn" onclick="switchTab('rot',this)">
-      <span class="nav-icon">📅</span>
-      <span class="nav-label">봉사</span>
     </button>
     <button class="nav-btn" onclick="switchTab('rules',this)">
       <span class="nav-icon">📋</span>
@@ -2602,7 +2600,7 @@ function renderDuty(){
   const next = computeRotationMonth(ny, nm);
   const el = document.getElementById('dutyCard');
   el.innerHTML=`
-    <div class="duty-card">
+    <div class="duty-card" onclick="switchToRot()" style="cursor:pointer">
       <div class="duty-split">
         <div class="duty-col">
           <div class="dc-label">이달 봉사자</div>
@@ -2622,6 +2620,7 @@ function renderDuty(){
           </div>
         </div>
       </div>
+      <div class="duty-more">봉사 전체 일정 ›</div>
     </div>`;
 }
 
@@ -2640,6 +2639,7 @@ function renderHomeStats(){
   const byPos = {GK:0,DF:0,MF:0,FW:0};
   S.players.forEach(p=>{ if(byPos[p.pos]!==undefined) byPos[p.pos]++; });
   el.innerHTML = `
+    <div class="home-section-hd">팀 요약</div>
     <div class="stats-row" style="grid-template-columns:repeat(2,1fr);margin-bottom:8px">
       <div class="stat-card"><div class="sv">${total}</div><div class="sl">선수</div></div>
       <div class="stat-card"><div class="sv" style="color:var(--accent)">${avgOvr}</div><div class="sl">팀 OVR</div></div>
@@ -2958,6 +2958,14 @@ function switchToRules(){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.getElementById('sec-rules').classList.add('active');
   btns.forEach(b=>b.classList.remove('active'));
+}
+
+// 봉사는 별도 탭에서 분리됨 — 홈 당번 카드 탭으로 진입
+function switchToRot(){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sec-rot').classList.add('active');
+  document.getElementById('scrollArea').scrollTop=0;
 }
 
 /* ──────────────────────────────────────────
