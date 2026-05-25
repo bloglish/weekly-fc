@@ -1941,6 +1941,9 @@ body.admin .comment-del-btn { display: block; }
             <div class="rule-li">통장 초대 문의: <strong>김준영</strong></div>
           </div>
         </div>
+
+        <div style="margin:20px 4px 8px;font-size:15px;font-weight:800;color:var(--text)">봉사 로테이션 전체 일정</div>
+        <div class="rotation-list" id="rotListRules"></div>
       </div>
     </div>
 
@@ -2820,7 +2823,6 @@ function renderMatches(videos){
 let rotShowAll = false;
 
 function renderRotation(){
-  const container=document.getElementById('rotList');
   const startY = CY - 2, endY = CY + 3;
   const rows = generateAutoRotation(startY, endY);
 
@@ -2860,7 +2862,8 @@ function renderRotation(){
     ? `<button class="rot-toggle-btn" onclick="rotShowAll=false;renderRotation()">지난 기록 숨기기</button>`
     : '';
 
-  container.innerHTML = listHtml + toggleHtml;
+  const html = listHtml + toggleHtml;
+  ['rotList','rotListRules'].forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML=html; });
 }
 
 function renderFines(){
