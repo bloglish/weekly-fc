@@ -1762,7 +1762,7 @@ body.admin .comment-del-btn { display: block; }
           <span class="ql-icon">💬</span>
           <span class="ql-label">카카오톡</span>
         </a>
-        <a class="ql-btn" href="https://bloglish.github.io/tactics-board/" target="_blank" rel="noopener">
+        <a class="ql-btn" href="https://byjunyoung.github.io/tactics-board/" target="_blank" rel="noopener">
           <span class="ql-icon">🗂️</span>
           <span class="ql-label">전술 보드</span>
         </a>
@@ -2382,6 +2382,7 @@ const SEED_P = [
   {num:4, pos:'DF',detail:'센백',      foot:'오른발',name:'이동훈',vest:1,note:'',pace:70,dribble:70,pass:84,shoot:70,defend:99,stamina:99},
   {num:3, pos:'DF',detail:'윙백, 센백',foot:'오른발',name:'김준영',vest:3,note:'',pace:84,dribble:84,pass:84,shoot:70,defend:99,stamina:84},
   {num:14,pos:'MF',detail:'윙',        foot:'오른발',name:'유성현',vest:1,note:'',pace:99,dribble:84,pass:84,shoot:84,defend:55,stamina:84},
+  {num:27,pos:'MF',detail:'공미',      foot:'오른발',name:'방오준',vest:1,note:'',pace:84,dribble:84,pass:84,shoot:84,defend:70,stamina:84},
   // 3티어
   {num:9, pos:'FW',detail:'윙',        foot:'오른발',name:'정회민',vest:1,note:'',pace:84,dribble:84,pass:70,shoot:84,defend:55,stamina:70},
   {num:1, pos:'GK',detail:'킾',        foot:'오른발',name:'강준영',vest:1,note:'',pace:70,dribble:55,pass:70,shoot:55,defend:99,stamina:84},
@@ -2404,7 +2405,7 @@ const SEED_P = [
   {num:25,pos:'MF',detail:'',          foot:'오른발',name:'장민제',vest:0,note:'',pace:70,dribble:70,pass:70,shoot:70,defend:70,stamina:70},
 ];
 
-// 봉사 로테이션 순서 (24명, 12쌍, 무한 순환)
+// 봉사 로테이션 순서 (25명, 매월 2명씩 슬라이딩 순환, 25개월 주기)
 const ROTATION_ORDER = [
   '양재원', '안근수', '김동찬', '오치헌',
   '이동훈', '장현승', '김효종', '윤가원',
@@ -2412,14 +2413,18 @@ const ROTATION_ORDER = [
   '유성현', '장민준', '이찬우', '정진수',
   '이철후', '김동현', '강준영', '정회민',
   '김준영', '가대현', '이민석', '장민제',
+  '방오준',
 ];
 const ROT_CYCLE_START = { year: 2026, month: 1 }; // 1사이클 시작 기준
 
 function computeRotationMonth(year, month) {
   const offset = (year - ROT_CYCLE_START.year) * 12 + (month - ROT_CYCLE_START.month);
-  const pairIdx = ((offset % 12) + 12) % 12;
+  // 매월 2명씩 슬라이딩(인원수 기준 순환) — 짝수 인원이면 기존 고정쌍과 동일, 홀수 인원도 공평하게 순환
+  const n = ROTATION_ORDER.length;
+  const i1 = (((offset * 2) % n) + n) % n;
+  const i2 = (i1 + 1) % n;
   const done = year < CY || (year === CY && month < CM) ? 'TRUE' : 'FALSE';
-  return { year, month, p1: ROTATION_ORDER[pairIdx * 2], p2: ROTATION_ORDER[pairIdx * 2 + 1], done };
+  return { year, month, p1: ROTATION_ORDER[i1], p2: ROTATION_ORDER[i2], done };
 }
 
 function generateAutoRotation(startYear, endYear) {
